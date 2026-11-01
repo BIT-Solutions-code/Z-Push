@@ -1308,7 +1308,7 @@ class TimezoneUtil {
      * @param string $timezone
      *
      * @access public
-     * @return int epoch
+     * @return int|false epoch, false if the value cannot be parsed
      */
     public static function MakeUTCDate($value, $timezone = null) {
         $tz = null;
@@ -1321,6 +1321,7 @@ class TimezoneUtil {
         }
         // Tolerate malformed values seen in invitations from other systems:
         // ' 20240925T210000Z', '20250307T12:0000', '2026-05-26T09:20:11.5891152Z'
+        $origValue = $value;
         $value = strtoupper(trim((string) $value));
         $value = preg_replace(array('/(\d)\.\d+(Z?)$/', '/[-:]/'), array('$1$2', ''), $value);
         //20110930T090000Z
@@ -1334,7 +1335,7 @@ class TimezoneUtil {
             $date = date_create_from_format('Ymd\THis\Z', $value . "T000000Z", $tz);
         }
         if (!$date) {
-            ZLog::Write(LOGLEVEL_ERROR, sprintf("TimezoneUtil::MakeUTCDate(): failed to convert '%s' to date", $value));
+            ZLog::Write(LOGLEVEL_ERROR, sprintf("TimezoneUtil::MakeUTCDate(): failed to convert '%s' to date", $origValue));
             // date_timestamp_get(false) is a TypeError on PHP 8 and aborts the whole Sync
             return false;
         }
