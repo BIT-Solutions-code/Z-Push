@@ -297,10 +297,16 @@ class Mail_mimeDecode
         }
         foreach (array('from', 'sender', 'subject', 'date', 'message-id', 'in-reply-to', 'references',
                        'thread-topic', 'thread-index', 'importance', 'priority', 'x-priority', 'content-class',
-                       'mime-version', 'content-type', 'content-transfer-encoding', 'content-disposition',
-                       'content-id', 'content-description', 'return-path') as $name) {
+                       'mime-version', 'content-id', 'content-description', 'return-path') as $name) {
             if (isset($return->headers[$name]) && is_array($return->headers[$name])) {
                 $return->headers[$name] = reset($return->headers[$name]);
+            }
+        }
+        // The loop below parses every content header line in order, so the last one decides
+        // ctype_*, disposition and the transfer encoding. Keep the last value here as well.
+        foreach (array('content-type', 'content-transfer-encoding', 'content-disposition') as $name) {
+            if (isset($return->headers[$name]) && is_array($return->headers[$name])) {
+                $return->headers[$name] = end($return->headers[$name]);
             }
         }
 
